@@ -24,12 +24,12 @@ if (!HTTPUSER || !HTTPPASSWD) {
 	HTTPUSER = HTTPPASSWD = "NOTHINGNothingNothing###";
 }
 router.post('/measurements', auth.httpAuth(HTTPUSER, HTTPPASSWD), function(req, res) {
-	var measurement = JSON.stringify(req.body);
-    console.log("New measurement: " + measurement);
+	var measurement = req.body;
+    console.log("New measurement: " + JSON.stringify(measurement));
     app.db.collection('measurements').insert(measurement, function (error, doc) 
     {
     	if (error) {
-    		console.log("Got DB error");
+    		console.log("Got DB error.");
     		res.send("Error adding value to MongoDB.");
     	}
     });
