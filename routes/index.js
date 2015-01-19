@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET measurements */
-router.get('/measurements', function(req, res) {
+router.get('/v1/measurements', function(req, res) {
 	app.db.collection('measurements').find().toArray(function(err, items) {
 		var m = {}
 		m["measurements"] = items;
@@ -23,7 +23,7 @@ var HTTPPASSWD = process.env.AQUARIUM_HTTP_PASS;
 if (!HTTPUSER || !HTTPPASSWD) {
 	HTTPUSER = HTTPPASSWD = "NOTHINGNothingNothing###";
 }
-router.post('/measurements', auth.httpAuth(HTTPUSER, HTTPPASSWD), function(req, res) {
+router.post('/v1/measurements/new', auth.httpAuth(HTTPUSER, HTTPPASSWD), function(req, res) {
 	var measurement = req.body;
     console.log("New measurement: " + JSON.stringify(measurement));
     app.db.collection('measurements').insert(measurement, function (error, doc) 
