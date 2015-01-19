@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongo = require('mongoskin');
 
 var routes = require('./routes/index');
 // var users = require('./routes/users');
@@ -21,6 +22,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Database
+var mongoConnectUrl;
+if (app.get('env') === 'development') {
+    mongoConnectUrl = "mongodb://localhost:27017/aquarium";
+} else {
+    var MONGO_USER = process.env.MONGO_USER;
+    var MONGO_PASSWD = process.env.MONGO_PASSWD;
+    var MONGO_HOST = process.env.MONGO_HOST;
+    mongoConnectUrl = "mongodb://" + MONGO_USER + ":" + MONGO_PASSWD + "@" + MONGO_HOST;
+}
+
+console.log('Connecting to MongoDB: ' + mongoConnectUrl);
+var db = mongo.db(mongoConnectUrl, {native_parser:true});
 
 app.use('/', routes);
 // app.use('/users', users);
@@ -57,4 +72,5 @@ app.use(function(err, req, res, next) {
 });
 
 
+exports.db = db;
 module.exports = app;

@@ -1,9 +1,7 @@
 var express = require('express');
+var auth = require('../utils/http-auth');
 var router = express.Router();
-
-// Database
-var mongo = require('mongoskin');
-var db = mongo.db("mongodb://localhost:27017/aquarium", {native_parser:true});
+var app = require('../app');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -12,28 +10,32 @@ router.get('/', function(req, res, next) {
 
 /* GET measurements */
 router.get('/measurements', function(req, res) {
-	db.collection('measurements').find().toArray(function(err, items) {
+	app.db.collection('measurements').find().toArray(function(err, items) {
 		var m = {}
 		m["measurements"] = items;
 		res.json(m);
 	});
 });
 
-/* Put new measurement */
-router.post('measurements', function(req, res) {
+/* POST new measurement */
+var HTTPUSER = process.env.AQUARIUM_HTTP_USER;
+var HTTPPASSWD = process.env.AQUARIUM_HTTP_PASS;
+if (!HTTPUSER || !HTTPPASSWD) {
+	HTTPUSER = HTTPPASSWD = "NOTHINGNothingNothing###";
+}
+router.post('/measurements', auth.httpAuth(HTTPUSER, HTTPPASSWD), function(req, res) {
+	var measurement = JSON.stringify(req.body);
+    console.log("New measurement: " + measurement);
+    app.db.collection('measurements').insert(measurement, function (error, doc) 
+    {
+    	if (error) {
+    		console.log("Got DB error");
+    		res.send("Error adding value to MongoDB.");
+    	}
+    });
+    res.end();
 });
 
 module.exports = router;
 
-var basicAuth = require('basic-auth');
-var httpAuth = function (username, password) {
-	return function (req, res, next) {
-		var user = basicAuth(req);
-		if (!user || user.name !== username || user.password !== password) {
-      		res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-      		return res.send(401);
-		} else {
-			next();
-		}
-	};
-}
+
