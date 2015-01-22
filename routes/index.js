@@ -11,14 +11,12 @@ router.get('/', function(req, res, next) {
 /* GET measurements */
 router.get('/v1/measurements', function(req, res) {
 	    var now = new Date();
-        var timeQuery = now.setHours(now.getHours() - 48);
-        console.log(timeQuery)
-
-        app.db.collection('measurements').find({ epoch_timestamp : { $gt : "$timeQuery"} }).toArray(function(err, items) {
-		var m = {}
-		m["measurements"] = items;
-		res.json(m);
-	});
+        var timeQuery = now.setHours(now.getHours() - 48) / 1000;
+        app.db.collection('measurements').find({ epoch_timestamp : { $gt : timeQuery} }).toArray(function(err, items) {
+    		var m = {}
+	    	m["measurements"] = items;
+		    res.json(m);
+	    });
 });
 
 /* POST new measurement */
@@ -29,6 +27,9 @@ if (!HTTPUSER || !HTTPPASSWD) {
 }
 router.post('/v1/measurements/new', auth.httpAuth(HTTPUSER, HTTPPASSWD), function(req, res) {
 	var measurement = req.body;
+
+	console.log("JSON: " + measurement)
+
     console.log("New measurement: " + JSON.stringify(measurement));
     app.db.collection('measurements').insert(measurement, function (error, doc) 
     {
