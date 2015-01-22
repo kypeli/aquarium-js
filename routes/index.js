@@ -28,8 +28,6 @@ if (!HTTPUSER || !HTTPPASSWD) {
 router.post('/v1/measurements/new', auth.httpAuth(HTTPUSER, HTTPPASSWD), function(req, res) {
 	var measurement = req.body;
 
-	console.log("JSON: " + measurement)
-
     console.log("New measurement: " + JSON.stringify(measurement));
     app.db.collection('measurements').insert(measurement, function (error, doc) 
     {
