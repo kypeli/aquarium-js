@@ -11,8 +11,10 @@ router.get('/', function(req, res, next) {
 /* GET measurements */
 router.get('/v1/measurements', function(req, res) {
 	    var now = new Date();
-        var timeQuery = now.setHours(now.getHours() - 48) / 1000;
-        app.db.collection('measurements').find({ epoch_timestamp : { $gt : timeQuery} }).toArray(function(err, items) {
+	    
+        var timeQuery = Math.floor(now.getTime() / 1000) - 60*60*24*2; // 48 hours.
+        console.log("now:" + Math.floor(now.getTime() / 1000) + ", query:" + timeQuery);
+        app.db.collection('measurements').find({ epoch_timestamp : { "$gt" : timeQuery} }).sort({epoch_timestamp : 1}).toArray(function(err, items) {
     		var m = {}
 	    	m["measurements"] = items;
 		    res.json(m);
